@@ -1,0 +1,20 @@
+server:
+  port: 8082
+
+
+learning:
+  kafka:
+    bootstrap-servers: "127.0.0.1:9092"
+    acks-config: "all"
+    retries-config: "3"
+    batch-size-config: "16384"
+    linger-ms-config: "1"
+    buffer-memory-config: "33554432"
+    group-id: "dev"
+    enable-auto-commit: "false"
+    key-serializer-class-config: "org.apache.kafka.common.serialization.StringSerializer"
+    value-serializer-class-config: "org.apache.kafka.common.serialization.StringSerializer"
+
+
+
+
