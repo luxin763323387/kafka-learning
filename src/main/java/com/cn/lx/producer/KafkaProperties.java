@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * kafka自定义配置
+ *
  * @author StevenLu
  * @date 2021/12/1 10:53 下午
  */

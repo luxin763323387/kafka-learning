@@ -20,6 +20,7 @@ public class KakfaProducerCallBack implements Callback {
 
     /**
      * 当消息发送完成时，会调用这里的onCompletion来告知消息已经发送成功
+     *
      * @param metadata
      * @param exception
      */
@@ -27,9 +28,7 @@ public class KakfaProducerCallBack implements Callback {
     public void onCompletion(RecordMetadata metadata, Exception exception) {
         if (exception == null) {
             long elapsedTime = System.currentTimeMillis() - startTime;
-            log.info("message(" + key + ", " + message + ") sent to partition(" + metadata.partition() +
-                    "), " +
-                    "offset(" + metadata.offset() + ") in " + elapsedTime + " ms");
+            log.info("message(" + key + ", " + message + ") sent to partition(" + metadata.partition() + "), " + "offset(" + metadata.offset() + ") in " + elapsedTime + " ms");
         } else {
             //todo 异常业务处理
             exception.printStackTrace();
