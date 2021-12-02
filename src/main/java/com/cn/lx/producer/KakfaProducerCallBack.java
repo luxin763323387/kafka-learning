@@ -5,6 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.RecordMetadata;
 
+/**
+ * kafka发送回调
+ * @author stevenlu
+ */
 @Slf4j
 public class KakfaProducerCallBack implements Callback {
 
