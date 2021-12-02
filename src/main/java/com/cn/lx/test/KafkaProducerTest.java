@@ -1,11 +1,13 @@
 package com.cn.lx.test;
 
+import com.cn.lx.producer.KakfaProducerCallBack;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
 
 /**
  * @author StevenLu
@@ -15,24 +17,28 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/test/")
 public class KafkaProducerTest {
 
-    @Autowired
-    private Producer<String, Object> producer;
-
     private final String topic = "sunday";
     private final String templateId = "templateId";
 
+    private final Producer<String, Object> producer;
+
+    public KafkaProducerTest(Producer<String, Object> producer) {
+        this.producer = producer;
+    }
+
     @GetMapping("kafkaConfProducer")
     public void kafkaConfProducer() throws Exception {
-        ProducerRecord<String, Object> record = new ProducerRecord<>(topic, templateId, "测试测试");
+        String value = "测试测试";
+        String uuid = UUID.randomUUID().toString();
+        long startTimes = System.currentTimeMillis();
+        ProducerRecord<String, Object> record = new ProducerRecord<>(topic, templateId, uuid + value);
+        producer.send(record, new KakfaProducerCallBack(startTimes, templateId, uuid + value));
+
+//        简单写法
 //        Future<RecordMetadata> send = producer.send(record);
 //        RecordMetadata recordMetadata = send.get();
 //        System.out.println(templateId + "partition : "+recordMetadata.partition()+" , offset : "+recordMetadata.offset());
 
-        producer.send(record, ((metadata, exception) -> {
-            if (exception != null) {
-                exception.printStackTrace();
-            }
-        }));
     }
 
 }
