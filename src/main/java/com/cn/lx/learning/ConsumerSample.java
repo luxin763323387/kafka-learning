@@ -26,12 +26,62 @@ public class ConsumerSample {
 
     public static void main(String[] args) {
         //helloworld();
-        commitedOffset();
+        //commitedOffset();
+        //commitedOffsetWithPartition();
+        //commited
     }
 
-    /*
-       手动提交offset,并且手动控制partition
-    */
+
+    /**
+     * 手动提交offset,并且手动控制partition,更高级
+     */
+    private static void commitedOffsetWithPartition2() {
+        Properties props = new Properties();
+        props.setProperty("bootstrap.servers", "localhost:9092");
+        props.setProperty("group.id", "test");
+        props.setProperty("enable.auto.commit", "false");
+        props.setProperty("auto.commit.interval.ms", "1000");
+        props.setProperty("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        props.setProperty("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+
+        KafkaConsumer<String, String> consumer = new KafkaConsumer(props);
+
+        // jiangzh-topic - 0,1两个partition
+        TopicPartition p0 = new TopicPartition(TOPIC_NAME, 0);
+        TopicPartition p1 = new TopicPartition(TOPIC_NAME, 1);
+
+        // 消费订阅哪一个Topic或者几个Topic
+        consumer.subscribe(Arrays.asList(TOPIC_NAME));
+
+        // 消费订阅某个Topic的某个分区
+        consumer.assign(Arrays.asList(p0));
+
+        while (true) {
+            ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(10000));
+            // 每个partition单独处理
+            for (TopicPartition partition : records.partitions()) {
+                List<ConsumerRecord<String, String>> pRecord = records.records(partition);
+                for (ConsumerRecord<String, String> record : pRecord) {
+                    System.out.printf("patition = %d , offset = %d, key = %s, value = %s%n",
+                            record.partition(), record.offset(), record.key(), record.value());
+
+                }
+                long lastOffset = pRecord.get(pRecord.size() - 1).offset();
+                // 单个partition中的offset，并且进行提交
+                Map<TopicPartition, OffsetAndMetadata> offset = new HashMap<>();
+                offset.put(partition, new OffsetAndMetadata(lastOffset + 1));
+                // 提交offset
+                consumer.commitSync(offset);
+                System.out.println("=============partition - " + partition + " end================");
+            }
+        }
+    }
+
+
+    /**
+     * 手动提交offset,并且手动控制partition
+     * 通过partition论循
+     */
     private static void commitedOffsetWithPartition() {
         Properties props = new Properties();
         props.setProperty("bootstrap.servers", "localhost:9092");
@@ -43,29 +93,32 @@ public class ConsumerSample {
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer(props);
         // 消费订阅哪一个Topic或者几个Topic
-        consumer.subscribe(Arrays.asList(TOPIC_NAME));
+        consumer.subscribe(Collections.singletonList(TOPIC_NAME));
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(10000));
             // 每个partition单独处理
-            for(TopicPartition partition : records.partitions()){
+            for (TopicPartition partition : records.partitions()) {
                 List<ConsumerRecord<String, String>> pRecord = records.records(partition);
                 for (ConsumerRecord<String, String> record : pRecord) {
                     System.out.printf("patition = %d , offset = %d, key = %s, value = %s%n",
                             record.partition(), record.offset(), record.key(), record.value());
 
                 }
-                long lastOffset = pRecord.get(pRecord.size() -1).offset();
+                long lastOffset = pRecord.get(pRecord.size() - 1).offset();
                 // 单个partition中的offset，并且进行提交
                 Map<TopicPartition, OffsetAndMetadata> offset = new HashMap<>();
-                offset.put(partition,new OffsetAndMetadata(lastOffset+1));
+                offset.put(partition, new OffsetAndMetadata(lastOffset + 1));
                 // 提交offset
                 consumer.commitSync(offset);
-                System.out.println("=============partition - "+ partition +" end================");
+                System.out.println("=============partition - " + partition + " end================");
             }
         }
     }
 
 
+    /**
+     * 手动提交
+     */
     private static void commitedOffset() {
         Properties props = new Properties();
         props.setProperty("bootstrap.servers", "localhost:9092");
