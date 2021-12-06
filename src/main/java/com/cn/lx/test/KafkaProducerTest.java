@@ -1,8 +1,10 @@
 package com.cn.lx.test;
 
+import com.cn.lx.producer.KafkaSender;
 import com.cn.lx.producer.KakfaProducerCallBack;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,6 +28,9 @@ public class KafkaProducerTest {
         this.producer = producer;
     }
 
+    @Autowired
+    private KafkaSender kafkaSender;
+
     @GetMapping("kafkaConfProducer")
     public void kafkaConfProducer() throws Exception {
         String value = "测试测试";
@@ -33,6 +38,21 @@ public class KafkaProducerTest {
         long startTimes = System.currentTimeMillis();
         ProducerRecord<String, Object> record = new ProducerRecord<>(topic, templateId, uuid + value);
         producer.send(record, new KakfaProducerCallBack(startTimes, templateId, uuid + value));
+
+//        简单写法
+//        Future<RecordMetadata> send = producer.send(record);
+//        RecordMetadata recordMetadata = send.get();
+//        System.out.println(templateId + "partition : "+recordMetadata.partition()+" , offset : "+recordMetadata.offset());
+
+    }
+
+    @GetMapping("kafkaConfProducer1")
+    public void kafkaConfProducer1() throws Exception {
+        String value = "测试测试";
+        String uuid = UUID.randomUUID().toString();
+        long startTimes = System.currentTimeMillis();
+        ProducerRecord<String, Object> record = new ProducerRecord<>(topic, templateId, uuid + value);
+        kafkaSender.send(topic,uuid + value);
 
 //        简单写法
 //        Future<RecordMetadata> send = producer.send(record);
